@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Oxide.Core;
 
 namespace Oxide.Plugins {
-  [Info("SafePvP", "snicyme", "0.1.3")]
+  [Info("SafePvP", "snicyme", "0.1.4")]
   [Description("Allows safe PvP mode per player :)")]
   public class SafePvP : RustPlugin {
 
@@ -30,32 +30,9 @@ namespace Oxide.Plugins {
     const string M_SWITCH_TO_SAFE = "Switch to safe";
     const string M_SWITCH_TO_UNSAFE = "Switch to unsafe";
     const string M_WARNING = "Warning";
-    const string M_WARNING_CANTBUILD = "WarningCantbuild";
     const string M_FIRE_INTERVAL = "Command Interval Error";
     const string M_HELP = "Help message";
 
-
-    #endregion
-
-
-    #region Data
-
-    private static readonly List<object> BuildEntityList = new List<object>() {
-      typeof(AutoTurret),typeof(Barricade),typeof(BaseCombatEntity),
-      typeof(BaseOven),typeof(BearTrap),typeof(BuildingBlock),
-      typeof(BuildingPrivlidge),typeof(CeilingLight),typeof(Door),
-      typeof(Landmine),typeof(LiquidContainer),typeof(ReactiveTarget),
-      typeof(RepairBench),typeof(ResearchTable),typeof(Signage),
-      typeof(SimpleBuildingBlock),typeof(SleepingBag),typeof(StabilityEntity),
-      typeof(StorageContainer),typeof(SurvivalFishTrap),typeof(WaterCatcher),
-      typeof(WaterPurifier)};
-    private static readonly List<object> BasePartEntityList = new List<object>() {
-      typeof(BaseOven),typeof(BuildingBlock),typeof(BuildingPrivlidge),
-      typeof(CeilingLight),typeof(Door),typeof(LiquidContainer),
-      typeof(RepairBench),typeof(ResearchTable),typeof(Signage),
-      typeof(SimpleBuildingBlock),typeof(SleepingBag),typeof(StabilityEntity),
-      typeof(StorageContainer),typeof(SurvivalFishTrap),typeof(WaterCatcher),
-      typeof(WaterPurifier)};
 
     #endregion
 
@@ -95,7 +72,6 @@ namespace Oxide.Plugins {
       [M_SWITCH_TO_UNSAFE] = "<color=yellow>{0}</color> switch to unsafe XD",
       [M_FIRE_INTERVAL] = "It takes <color=yellow>{0}</color> seconds until the command can be used :(",
       [M_WARNING] = "<color=red>{0} is PvE Player :)</color>",
-      [M_WARNING_CANTBUILD] = "<color=red>PvE Player's Building :)</color>",
       [M_HELP] = "\n<color=yellow>safe</color>\n<color=#66ff66>{0}</color>\n\n<color=yellow>command usage</color>\n<color=#36a1d8>/sp on</color> switch to safe.\n<color=#36a1d8>/sp off</color> switch to unsafe.\n<color=#36a1d8>/sp</color> this help.",
     };
 
@@ -179,24 +155,19 @@ namespace Oxide.Plugins {
       if (!player.IsConnected || !player.userID.IsSteamId()) return;
 
       // vs player
-      if (entity is BasePlayer) {
-        BasePlayer opponent = entity as BasePlayer;
-        // SendMsg(player, "attack to " + opponent.userID.ToString());
-        if (!opponent.IsConnected || !opponent.userID.IsSteamId()) return;
-        // SendMsg(player, "attack from " + player.userID.ToString());
+      if (!(entity is BasePlayer)) return;
 
-        // if (SafePlayer.Contains(player.userID)) { SendMsg(player, "SafePlayer Player Contains"); }
-        // if (SafePlayer.Contains(opponent.userID)) { SendMsg(player, "SafePlayer Opponent Contains"); }
+      BasePlayer opponent = entity as BasePlayer;
+      // SendMsg(player, "attack to " + opponent.userID.ToString());
+      if (!opponent.IsConnected || !opponent.userID.IsSteamId()) return;
+      // SendMsg(player, "attack from " + player.userID.ToString());
 
-        if (SafePlayer.Contains(player.userID) || SafePlayer.Contains(opponent.userID)) {
-          if (player.userID != opponent.userID) {
-            SendMsg(player, M_WARNING, opponent.displayName);
-            info.damageTypes.ScaleAll(0);
-          }
-        }
-      } else if (BuildEntityList.Contains(entity.GetType()) || BasePartEntityList.Contains(entity.GetType())) {
-        if (SafePlayer.Contains(entity.OwnerID) && !player.CanBuild()) {
-          SendMsg(player, M_WARNING_CANTBUILD);
+      // if (SafePlayer.Contains(player.userID)) { SendMsg(player, "SafePlayer Player Contains"); }
+      // if (SafePlayer.Contains(opponent.userID)) { SendMsg(player, "SafePlayer Opponent Contains"); }
+
+      if (SafePlayer.Contains(player.userID) || SafePlayer.Contains(opponent.userID)) {
+        if (player.userID != opponent.userID) {
+          SendMsg(player, M_WARNING, opponent.displayName);
           info.damageTypes.ScaleAll(0);
         }
       }
